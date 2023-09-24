@@ -15,11 +15,19 @@ function startVideo() {
 }
 
 video.addEventListener("play", () => {
+  const canvas = faceapi.createCanvasFromMedia(video);
+  document.body.append(canvas);
+  const displaySie = { with: video.clientWidth, height: video.height };
+  faceapi.matchDimensions(canvas, displaySie);
   setInterval(async () => {
     const detections = await faceapi
       .detectAllFaces(video, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
-      .withFaceExpressions()
-      console.log(detections)
+      .withFaceExpressions();
+    const resizeDetections = faceapi.resizeResults(detections, displaySie);
+    canvas.getContext("2d").clearRect(0, 0, canvas.width, canvas.height);
+    faceapi.draw.drawDetections(canvas, resizeDetections);
+    faceapi.draw.drawFaceLandmarks(canvas, resizeDetections);
+    faceapi.draw.drawFaceExpressions(canvas, resizeDetections);
   }, 100);
 });
